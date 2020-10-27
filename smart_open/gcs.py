@@ -189,10 +189,10 @@ class _RawReader(object):
             #
             binary = b''
         elif size == -1:
-            binary = self._blob.download_as_bytes(start=start, self.checksum)
+            binary = self._blob.download_as_bytes(start=start, checksum=self.checksum)
         else:
             end = position + size
-            binary = self._blob.download_as_bytes(start=start, end=end, self.checksum)
+            binary = self._blob.download_as_bytes(start=start, end=end, checksum=self.checksum)
         return binary
 
 
