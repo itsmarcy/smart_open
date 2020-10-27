@@ -156,11 +156,12 @@ def open(
 class _RawReader(object):
     """Read an GCS object."""
 
-    def __init__(self, gcs_blob, size):
+    def __init__(self, gcs_blob, size, checksum):
         # type: (google.cloud.storage.Blob, int) -> None
         self._blob = gcs_blob
         self._size = size
         self._position = 0
+        self.checksum = checksum
 
     def seek(self, position):
         """Seek to the specified position (byte offset) in the GCS key.
@@ -188,10 +189,10 @@ class _RawReader(object):
             #
             binary = b''
         elif size == -1:
-            binary = self._blob.download_as_string(start=start)
+            binary = self._blob.download_as_bytes(start=start, self.checksum)
         else:
             end = position + size
-            binary = self._blob.download_as_string(start=start, end=end)
+            binary = self._blob.download_as_bytes(start=start, end=end, self.checksum)
         return binary
 
 
@@ -210,6 +211,7 @@ class Reader(io.BufferedIOBase):
             buffer_size=DEFAULT_BUFFER_SIZE,
             line_terminator=constants.BINARY_NEWLINE,
             client=None,  # type: google.cloud.storage.Client
+            checksum="md5"
     ):
         if client is None:
             client = google.cloud.storage.Client()
@@ -221,7 +223,7 @@ class Reader(io.BufferedIOBase):
 
         self._size = self._blob.size if self._blob.size is not None else 0
 
-        self._raw_reader = _RawReader(self._blob, self._size)
+        self._raw_reader = _RawReader(self._blob, self._size, self.checksum)
         self._current_pos = 0
         self._current_part_size = buffer_size
         self._current_part = smart_open.bytebuffer.ByteBuffer(buffer_size)
