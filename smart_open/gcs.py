@@ -223,7 +223,7 @@ class Reader(io.BufferedIOBase):
 
         self._size = self._blob.size if self._blob.size is not None else 0
 
-        self._raw_reader = _RawReader(self._blob, self._size, self.checksum)
+        self._raw_reader = _RawReader(self._blob, self._size, checksum)
         self._current_pos = 0
         self._current_part_size = buffer_size
         self._current_part = smart_open.bytebuffer.ByteBuffer(buffer_size)
